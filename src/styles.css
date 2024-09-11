@@ -1,0 +1,10 @@
+canvas {
+  display: block;
+  margin-bottom: 10px; /* Adds space between canvas and link */
+}
+
+a {
+  display: block;
+  text-decoration: none;
+  color: blue;
+}

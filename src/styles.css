@@ -8,3 +8,19 @@ a {
   text-decoration: none;
   color: blue;
 }
+
+.canvas-with-buttons{
+  display: flex;
+  flex-direction: row;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  flex-basis: auto;
+  justify-content: flex-end;
+  margin: 1rem;
+}
+
+.button-main{
+}

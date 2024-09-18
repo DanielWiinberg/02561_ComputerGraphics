@@ -18,7 +18,7 @@ window.onload = function init(){
   ];
 
   var vBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);   
+  gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
 
   var vPosition = gl.getAttribLocation(program, "a_Position");

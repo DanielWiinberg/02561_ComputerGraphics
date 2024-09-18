@@ -1,11 +1,13 @@
-declare const WebGLUtils: {
-  setupWebGL(canvas: HTMLCanvasElement): WebGLRenderingContext | null;
-};
+var canvas: HTMLCanvasElement;
+var gl: WebGLRenderingContext | null = null;
+var index = 0;
 
 window.onload = function init(){
-  var canvas = document.getElementById("webGL_Canvas") as HTMLCanvasElement;
+  canvas = document.getElementById("webGL_Canvas") as HTMLCanvasElement;
 
-  var gl = WebGLUtils.setupWebGL(canvas);
+  /////////////////////////////////////////////////////////////////////
+  //#region SETTING UP WEGBL
+  gl = WebGLUtils.setupWebGL(canvas);
   if(!gl){
     const error = new Error("WebGL could not be setup");
     alert(error.message);
@@ -15,17 +17,41 @@ window.onload = function init(){
   gl.clearColor(0.3921, 0.5843, 0.9294, 1.0);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  var program = initShaders(gl, "vertex-shader", "fragment-shader");
+  const program = initShaders(gl, "vertex-shader", "fragment-shader");
   gl.useProgram(program);
+  //#endregion
 
-  var vertices = [ vec2(0.0, 0.0), vec2(1.0, 0.0), vec2(1.0, 1.0) ];
-  var vBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);   
-  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+  const maxVertices = 100;
+  const vBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, maxVertices*sizeof['vec2'], gl.STATIC_DRAW);
 
-  var vPosition = gl.getAttribLocation(program, "a_position");
-  gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);   
+  canvas.addEventListener('click', (event: MouseEvent) => {
+    if(!gl) return;
+    const bbox = canvas.getBoundingClientRect();
+
+    const xPosition = 2*(event.clientX - bbox.left) / canvas.width - 1;
+    const yPosition = 2*(canvas.height - event.clientY + bbox.top) / canvas.height - 1;
+    const canvasPosition = vec2(xPosition, yPosition);
+    
+    gl.bufferSubData(gl.ARRAY_BUFFER, index*sizeof['vec2'], flatten(canvasPosition));
+
+    index++;
+  });
+
+  const vPosition = gl.getAttribLocation(program, "a_position");
+  gl.vertexAttribPointer(vPosition, 2, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vPosition);
 
-  gl.drawArrays(gl.POINTS, 0, vertices.length);
+  render();
+}
+
+function render(){
+  if(!gl) return;
+
+  gl.clear(gl.COLOR_BUFFER_BIT); //Clearing the canvas between animations
+
+  gl.drawArrays(gl.POINTS, 0, index);
+
+  requestAnimationFrame(render);
 }

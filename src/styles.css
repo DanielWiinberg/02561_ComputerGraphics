@@ -20,6 +20,7 @@ a {
   flex-basis: auto;
   justify-content: flex-end;
   margin: 1rem;
+  gap: 1rem;
 }
 
 .button-main{

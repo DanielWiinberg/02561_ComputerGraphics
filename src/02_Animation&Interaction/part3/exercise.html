@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="text/javascript" src="main.js"></script>
+    <link rel="stylesheet" href="../../styles.css">
+    <script type="text/javascript" src  ="../../angelCommon/webgl-utils.js"></script>
+    <script type="text/javascript" src  ="../../angelCommon/initShaders.js"></script>
+    <script type="text/javascript" src  ="../../angelCommon/MV.js"></script>
+
+    <script id ="vertex-shader" type="x-shader/x-vertex">
+      attribute vec4 a_position;
+      attribute vec4 a_Color;
+      varying vec4 v_Color;
+
+      void main(){
+        v_Color = a_Color;
+        gl_Position = a_position; 
+        gl_PointSize = 10.0;
+      }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+      precision mediump float;
+      varying vec4 v_Color;
+
+      void main() { 
+        gl_FragColor = v_Color;
+      }
+    </script>
+  </head>
+
+<body>
+  <h1>Creating points on click</h1>
+  
+  <div class="canvas-with-buttons">
+    <canvas id ="webGL_Canvas" width="512" height="512"></canvas>
+    <div class="button-container">
+      <select name="" id="drawing-mode">
+        <option value="0">Points</option>
+        <option value="1">Triangles</option>
+      </select>
+
+      <select name="" id="color-selection">
+        <option value="0">Black</option>
+        <option value="1">Red</option>
+        <option value="2">Yellow</option>
+        <option value="3">Green</option>
+        <option value="4">Blue</option>
+        <option value="5">Magenta</option>
+        <option value="6">Cyan</option>
+      </select>
+
+      <button class="button-main" id="clearCanvasButton">Clear canvas</button>
+    </div>
+  </div>
+
+  <hr>
+  <a href="../../index.html">Return to start</a>
+</body>
+</html>

@@ -2,14 +2,13 @@
 var gl;
 var canvas;
 
-var index = 0;
-
 var pointsArray = [];
+var subdivisions = 3;
 
-var va = vec4(0.0, 0.0, -1.0,1);
-var vb = vec4(0.0, 0.942809, 0.333333, 1);
-var vc = vec4(-0.816497, -0.471405, 0.333333, 1);
-var vd = vec4(0.816497, -0.471405, 0.333333,1);
+var va = vec4(0.0, 0.0, 1.0, 1);
+var vb = vec4(0.0, 0.942809, -0.333333, 1);
+var vc = vec4(-0.816497, -0.471405, -0.333333, 1);
+var vd = vec4(0.816497, -0.471405, -0.333333, 1);
 
 window.onload = function init() {
   canvas = document.getElementById("webGL_Canvas");
@@ -44,7 +43,7 @@ window.onload = function init() {
   gl.bindBuffer(gl.ARRAY_BUFFER, gl.vertexBuffer);
 
   const vertexPosition = gl.getAttribLocation(program, "vertex_position");
-  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribPointer(vertexPosition, 4, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vertexPosition);
 
   gl.colorBuffer = gl.createBuffer();
@@ -57,38 +56,7 @@ window.onload = function init() {
   //#endregion
 
   /////////////////////////////////////////////////////////////////////
-  //#region BUILDING A CUBE
-  var vertices = [
-    vec3( -0.5, -0.5,  0.5 ),
-    vec3( -0.5,  0.5,  0.5 ),
-    vec3(  0.5,  0.5,  0.5 ),
-    vec3(  0.5, -0.5,  0.5 ),
-    vec3( -0.5, -0.5, -0.5 ),
-    vec3( -0.5,  0.5, -0.5 ),
-    vec3(  0.5,  0.5, -0.5 ),
-    vec3(  0.5, -0.5, -0.5 )
-  ];
-
-  tetrahedron(va, vb, vc, vd, 2);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.vertexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
-
-  // var cube_indices = new Uint32Array([
-  //   1, 0, 3, 3, 2, 1, // front
-  //   2, 3, 7, 7, 6, 2, // right
-  //   3, 0, 4, 4, 7, 3, // down
-  //   6, 5, 1, 1, 2, 6, // up
-  //   4, 5, 6, 6, 7, 4, // back
-  //   5, 4, 0, 0, 1, 5 // left
-  // ]);
-  // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-  // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, cube_indices, gl.STATIC_DRAW);
-
-  //#endregion
-
-  /////////////////////////////////////////////////////////////////////
-  // CAMERA PROJECTION
+  //#region CAMERA PROJECTION
   var fov = 60; 
   var aspect = canvas.width / canvas.height; // Aspect ratio
   var near = 0.3; // Near clipping plane
@@ -99,23 +67,53 @@ window.onload = function init() {
   var cameraProjectionMatrixLocation = gl.getUniformLocation(program, 'cameraProjectionMatrix');
   gl.uniformMatrix4fv(cameraProjectionMatrixLocation, false, flatten(perspectiveCamera));
 
-  // /////////////////////////////////////////////////////////////////////
-  // // MODEL PROJECTION
+  //#endregion
 
-  // var modelViewMatrix_onePoint = new mat4();
-  // modelViewMatrix_onePoint = mult(modelViewMatrix_onePoint, translate(0.0, 0.0, -3.0));
-  // drawCube(gl, program, modelViewMatrix_onePoint);
+  /////////////////////////////////////////////////////////////////////
+  //#region MODEL PROJECTION
+  var modelViewMatrix = new mat4();
+  modelViewMatrix = mult(modelViewMatrix, translate(0.0, 0.0, -4.5));
+  var modelViewMatrixLocation = gl.getUniformLocation(program, 'modelViewMatrix');
+  gl.uniformMatrix4fv(modelViewMatrixLocation, false, flatten(modelViewMatrix));
+
+  //#endregion
+
+  /////////////////////////////////////////////////////////////////////
+  // BUTTONS
+  const incrementButton = document.getElementById('incrementSubdivisions');
+  const decrementButton = document.getElementById('decrementSubdivisions');
+
+  incrementButton.addEventListener('click', () => {
+    subdivisions++;
+    drawSphere();
+  });
+  decrementButton.addEventListener('click', () => {
+    if(subdivisions === 1) return;
+
+    subdivisions--;
+    drawSphere();
+  });
+
+  /////////////////////////////////////////////////////////////////////
+  // DRAW CALL
+  drawSphere();
 };
 
-// function drawCube(gl, program, transformationMatrix){
-//   var modelViewMatrixLocation = gl.getUniformLocation(program, 'modelViewMatrix');
-//   gl.uniformMatrix4fv(modelViewMatrixLocation, false, flatten(transformationMatrix));
-//   gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_INT, 0);
-// }
+function drawSphere(){
+  pointsArray = [];
+  tetrahedron(va, vb, vc, vd, subdivisions); // Populates pointsArray
+  console.log({pointsArray});
+  
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length);
+}
+
 
 /////////////////////////////////////////////////////////////////////
 //#region SPHERE FUNCTIONS
-
 function tetrahedron(a, b, c, d, n){
   divideTriangle(a, b, c, n);
   divideTriangle(d, c, b, n);

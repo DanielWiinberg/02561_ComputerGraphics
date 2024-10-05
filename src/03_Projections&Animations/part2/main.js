@@ -43,7 +43,7 @@ window.onload = function init() {
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 
   const vertexPosition = gl.getAttribLocation(program, "vertex_position");
-  gl.vertexAttribPointer(vertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribPointer(vertexPosition, 4, gl.FLOAT, false, 0, 0);
   gl.enableVertexAttribArray(vertexPosition);
 
   // colorBuffer = gl.createBuffer();

@@ -3,6 +3,7 @@ var gl;
 var canvas;
 
 var points = [];
+var colors = [];
 var subdivisions = 3;
 
 var va = vec4(0.0, 0.0, 1.0, 1);
@@ -26,6 +27,8 @@ window.onload = function init() {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   gl.enable(gl.DEPTH_TEST);
+  gl.enable(gl.CULL_FACE);
+  gl.cullFace(gl.BACK);
 
   const program = initShaders(gl, "vertex-shader", "fragment-shader");
   gl.useProgram(program);
@@ -102,10 +105,23 @@ window.onload = function init() {
 function drawSphere(){
   points = [];
   tetrahedron(va, vb, vc, vd, subdivisions); // Populates pointsArray
-  console.log({pointsArray: points});
-  
   gl.bindBuffer(gl.ARRAY_BUFFER, gl.vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW);
+  
+  colors = [];
+  for(let point of points){
+    const color = vec4(
+      0.5*point[0] + 0.5,
+      0.5*point[1] + 0.5,
+      0.5*point[2] + 0.5,
+      1
+    )
+    colors.push(color);
+  }
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLES, 0, points.length);
